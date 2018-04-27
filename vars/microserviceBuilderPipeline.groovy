@@ -46,6 +46,7 @@ def call(body) {
   body()
 
   print "microserviceBuilderPipeline : config = ${config}"
+  print "souce code: " + getClass().protectionDomain.codeSource.location.path
 
   def image = config.image
   def maven = (config.mavenImage == null) ? 'maven:3.5.2-jdk-8' : config.mavenImage
@@ -60,6 +61,8 @@ def call(body) {
   def deploy = (config.deploy ?: env.DEPLOY ?: "true").toBoolean()
   def namespace = (config.namespace ?: env.NAMESPACE ?: "").trim()
   def tillerNamespace = (env.TILLER_NAMESPACE ?: "default").trim()
+  // MK - version demonstration
+  def deployVersions = (config.deployVersions ?: env.DEPLOY_VERSIONS ?: "false").toBoolean()
 
   // these options were all added later. Helm chart may not have the associated properties set.
   def test = (config.test ?: (env.TEST ?: "false").trim()).toLowerCase() == 'true'
@@ -321,6 +324,9 @@ def deployProject (String chartFolder, String registry, String image, String ima
         createNamespace(namespace, registrySecret)   
       }
       def releaseName = (env.BRANCH_NAME == "master") ? "${image}" : "${image}-${env.BRANCH_NAME}"
+      if (deployVersions) {
+        deployCommand += " --new-version ${releaseName}-${imageTag}"
+      }
       deployCommand += " ${releaseName} ${chartFolder}"
       sh deployCommand
     }
