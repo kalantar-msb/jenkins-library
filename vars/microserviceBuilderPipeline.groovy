@@ -63,6 +63,7 @@ def call(body) {
   // MK - version demonstration
   def deployVersions = (config.deployVersions ?: env.DEPLOY_VERSIONS ?: "false").toBoolean()
   def binPath = new File(getClass().protectionDomain.codeSource.location.path).parent + "/../bin"
+  def mkpath = new File(getClass().protectionDomain.codeSource.location.path).parent
 
   // these options were all added later. Helm chart may not have the associated properties set.
   def test = (config.test ?: (env.TEST ?: "false").trim()).toLowerCase() == 'true'
@@ -117,13 +118,12 @@ def call(body) {
         checkout scm
         gitCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
         echo "checked out git commit ${gitCommit}"
-        path = new File(getClass().protectionDomain.codeSource.location.path).parent
-        sh(script: 'echo ${path}', returnStdout: true).trim()
-        sh(script: 'ls ${path}', returnStdout: true).trim()
-        sh(script: 'echo ${path}/..', returnStdout: true).trim()
-        sh(script: 'ls ${path}/..', returnStdout: true).trim()
-        sh(script: 'echo ${path}/../bin', returnStdout: true).trim()
-        sh(script: 'ls ${path}/../bin', returnStdout: true).trim()
+        sh(script: 'echo ${mkpath}', returnStdout: true).trim()
+        sh(script: 'ls ${mkpath}', returnStdout: true).trim()
+        sh(script: 'echo ${mkpath}/..', returnStdout: true).trim()
+        sh(script: 'ls ${mkpath}/..', returnStdout: true).trim()
+        sh(script: 'echo ${mkpath}/../bin', returnStdout: true).trim()
+        sh(script: 'ls ${mkpath}/../bin', returnStdout: true).trim()
       }
 
       def imageTag = null
