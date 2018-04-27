@@ -118,12 +118,12 @@ def call(body) {
         gitCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
         echo "checked out git commit ${gitCommit}"
         path = new File(getClass().protectionDomain.codeSource.location.path).parent
-        sh(script: 'echo ${path}'
-        sh(script: 'ls ${path}'
-        sh(script: 'echo ${path}/..'
-        sh(script: 'ls ${path}/..'
-        sh(script: 'echo ${path}/../bin'
-        sh(script: 'ls ${path}/../bin'
+        sh(script: 'echo ${path}', returnStdout: true).trim()
+        sh(script: 'ls ${path}', returnStdout: true).trim()
+        sh(script: 'echo ${path}/..', returnStdout: true).trim()
+        sh(script: 'ls ${path}/..', returnStdout: true).trim()
+        sh(script: 'echo ${path}/../bin', returnStdout: true).trim()
+        sh(script: 'ls ${path}/../bin', returnStdout: true).trim()
       }
 
       def imageTag = null
