@@ -119,12 +119,12 @@ def call(body) {
         checkout scm
         gitCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
         echo "checked out git commit ${gitCommit}"
-        sh(script: 'echo ${mkpath}', returnStdout: true).trim()
-        sh(script: 'ls ${mkpath}', returnStdout: true).trim()
-        sh(script: 'echo ${mkpath}/..', returnStdout: true).trim()
-        sh(script: 'ls ${mkpath}/..', returnStdout: true).trim()
-        sh(script: 'echo ${mkpath}/../bin', returnStdout: true).trim()
-        sh(script: 'ls ${mkpath}/../bin', returnStdout: true).trim()
+        sh "echo ${mkpath}"
+        sh "ls ${mkpath}"
+        sh "echo ${mkpath}/.."
+        sh "ls ${mkpath}/.."
+        sh "echo ${mkpath}/../bin"
+        sh "ls ${mkpath}/../bin"
       }
 
       def imageTag = null
