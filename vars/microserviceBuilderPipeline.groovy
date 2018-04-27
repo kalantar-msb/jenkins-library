@@ -46,7 +46,7 @@ def call(body) {
   body()
 
   print "microserviceBuilderPipeline : config = ${config}"
-  print "souce code: " + getClass().protectionDomain.codeSource.location.path
+  print "source code: " + getClass().protectionDomain.codeSource.location.path
 
   def image = config.image
   def maven = (config.mavenImage == null) ? 'maven:3.5.2-jdk-8' : config.mavenImage
@@ -325,7 +325,8 @@ def deployProject (String chartFolder, String registry, String image, String ima
       }
       def releaseName = (env.BRANCH_NAME == "master") ? "${image}" : "${image}-${env.BRANCH_NAME}"
       if (deployVersions) {
-        deployCommand += " --new-version ${releaseName}-${imageTag}"
+        scriptDir = new File(getClass().protectionDomain.codeSource.location.path).parent 
+        deployCommand = scriptDir + "/../bin/myhelm/" + deployCommand + " --new-version ${releaseName}-${imageTag}"
       }
       deployCommand += " ${releaseName} ${chartFolder}"
       sh deployCommand
