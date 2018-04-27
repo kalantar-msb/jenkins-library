@@ -326,7 +326,7 @@ def deployProject (String chartFolder, String registry, String image, String ima
       def releaseName = (env.BRANCH_NAME == "master") ? "${image}" : "${image}-${env.BRANCH_NAME}"
       if (deployVersions) {
         scriptDir = new File(getClass().protectionDomain.codeSource.location.path).parent 
-        deployCommand = scriptDir + "/../bin/myhelm/" + deployCommand + " --new-version ${releaseName}-${imageTag}"
+        deployCommand = scriptDir + "/../bin/my" + deployCommand + " --new-version ${releaseName}-${imageTag}"
       }
       deployCommand += " ${releaseName} ${chartFolder}"
       sh deployCommand
