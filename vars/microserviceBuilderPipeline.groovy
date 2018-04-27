@@ -46,7 +46,6 @@ def call(body) {
   body()
 
   print "microserviceBuilderPipeline : config = ${config}"
-  print "source code: " + getClass().protectionDomain.codeSource.location.path
 
   def image = config.image
   def maven = (config.mavenImage == null) ? 'maven:3.5.2-jdk-8' : config.mavenImage
@@ -63,6 +62,7 @@ def call(body) {
   def tillerNamespace = (env.TILLER_NAMESPACE ?: "default").trim()
   // MK - version demonstration
   def deployVersions = (config.deployVersions ?: env.DEPLOY_VERSIONS ?: "false").toBoolean()
+  def binPath = new File(getClass().protectionDomain.codeSource.location.path).parent + "/../bin"
 
   // these options were all added later. Helm chart may not have the associated properties set.
   def test = (config.test ?: (env.TEST ?: "false").trim()).toLowerCase() == 'true'
@@ -283,7 +283,7 @@ def call(body) {
             initalizeHelm (tillerNamespace)
             helmInitialized = true
           }
-          deployProject (realChartFolder, registry, image, imageTag, namespace, manifestFolder, registrySecret, deployVersions)
+          deployProject (realChartFolder, registry, image, imageTag, namespace, manifestFolder, registrySecret, deployVersions, binPath)
         }
       }
     }
@@ -312,7 +312,7 @@ def initalizeHelm (String tillerNamespace) {
   }
 }
 
-def deployProject (String chartFolder, String registry, String image, String imageTag, String namespace, String manifestFolder, String registrySecret,deployVersions) {
+def deployProject (String chartFolder, String registry, String image, String imageTag, String namespace, String manifestFolder, String registrySecret,deployVersions, binPath) {
   if (chartFolder != null && fileExists(chartFolder)) {
     container ('helm') {
       def deployCommand = "helm upgrade --install --wait --values pipeline.yaml"
@@ -325,8 +325,7 @@ def deployProject (String chartFolder, String registry, String image, String ima
       }
       def releaseName = (env.BRANCH_NAME == "master") ? "${image}" : "${image}-${env.BRANCH_NAME}"
       if (deployVersions) {
-        scriptDir = new File(getClass().protectionDomain.codeSource.location.path).parent 
-        deployCommand = scriptDir + "/../bin/my" + deployCommand + " --new-version ${releaseName}-${imageTag}"
+        deployCommand = binPath + "/my" + deployCommand + " --new-version ${releaseName}-${imageTag}"
       }
       deployCommand += " ${releaseName} ${chartFolder}"
       sh deployCommand
