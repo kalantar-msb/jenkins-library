@@ -64,6 +64,7 @@ def call(body) {
   def deployVersions = (config.deployVersions ?: env.DEPLOY_VERSIONS ?: "false").toBoolean()
   def binPath = new File(getClass().protectionDomain.codeSource.location.path).parent + "/../bin"
   def mkpath = new File(getClass().protectionDomain.codeSource.location.path).parent
+  print "mkpath is ${mkpath}"
 
   // these options were all added later. Helm chart may not have the associated properties set.
   def test = (config.test ?: (env.TEST ?: "false").trim()).toLowerCase() == 'true'
