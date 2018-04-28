@@ -109,6 +109,10 @@ def call(body) {
         envVars: [
           containerEnvVar(key: 'TILLER_NAMESPACE', value: tillerNamespace)
         ]),
+      containerTemplate(name: 'rhelm', image: rhelm, ttyEnabled: true, command: 'cat',
+        envVars: [
+          containerEnvVar(key: 'TILLER_NAMESPACE', value: tillerNamespace)
+        ]),
     ],
     volumes: volumes
   ) {
