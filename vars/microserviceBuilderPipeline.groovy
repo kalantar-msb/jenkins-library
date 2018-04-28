@@ -65,8 +65,6 @@ def call(body) {
   // MK - version demonstration
   def deployVersions = (config.deployVersions ?: env.DEPLOY_VERSIONS ?: "false").toBoolean()
   def binPath = new File(getClass().protectionDomain.codeSource.location.path).parent + "/../bin"
-  def mkpath = new File(getClass().protectionDomain.codeSource.location.path).parent
-  print "mkpath is ${mkpath}"
 
   // these options were all added later. Helm chart may not have the associated properties set.
   def test = (config.test ?: (env.TEST ?: "false").trim()).toLowerCase() == 'true'
@@ -121,12 +119,6 @@ def call(body) {
         checkout scm
         gitCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
         echo "checked out git commit ${gitCommit}"
-        sh "echo ${mkpath}"
-        sh "ls ${mkpath}"
-        sh "echo ${mkpath}/.."
-        sh "ls ${mkpath}/.."
-        sh "echo ${mkpath}/../bin"
-        sh "ls ${mkpath}/../bin"
       }
 
       def imageTag = null
@@ -293,7 +285,7 @@ def call(body) {
             initalizeHelm (tillerNamespace)
             helmInitialized = true
           }
-          deployProject (realChartFolder, registry, image, imageTag, namespace, manifestFolder, registrySecret, deployVersions, binPath)
+          deployProject (realChartFolder, registry, image, imageTag, namespace, manifestFolder, registrySecret, deployVersions)
         }
       }
     }
@@ -322,7 +314,7 @@ def initalizeHelm (String tillerNamespace) {
   }
 }
 
-def deployProject (String chartFolder, String registry, String image, String imageTag, String namespace, String manifestFolder, String registrySecret,deployVersions, binPath) {
+def deployProject (String chartFolder, String registry, String image, String imageTag, String namespace, String manifestFolder, String registrySecret,deployVersions) {
   if (chartFolder != null && fileExists(chartFolder)) {
     container ('helm') {
       def deployCommand = "helm upgrade --install --wait --values pipeline.yaml"
@@ -335,7 +327,7 @@ def deployProject (String chartFolder, String registry, String image, String ima
       }
       def releaseName = (env.BRANCH_NAME == "master") ? "${image}" : "${image}-${env.BRANCH_NAME}"
       if (deployVersions) {
-        deployCommand = binPath + "/r" + deployCommand + " --new-version ${releaseName}-${imageTag}"
+        deployCommand = "r" + deployCommand + " --new-version ${releaseName}-${imageTag}"
       }
       deployCommand += " ${releaseName} ${chartFolder}"
       sh deployCommand
