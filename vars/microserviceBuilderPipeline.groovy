@@ -14,8 +14,8 @@
     mavenImage = 'maven:3.5.2-jdk-8'
     dockerImage = 'ibmcom/docker:17.10'
     kubectlImage = 'ibmcom/k8s-kubectl:v1.8.3'
-    //helmImage = 'lachlanevenson/k8s-helm:v2.7.2'
-    helmImage = 'kalantar/k8s-helm:v2.7.2'
+    helmImage = 'lachlanevenson/k8s-helm:v2.7.2'
+    rhelmImage = 'kalantar/rhelm:v2.7.2'
 
   You can also specify:
 
@@ -52,8 +52,8 @@ def call(body) {
   def maven = (config.mavenImage == null) ? 'maven:3.5.2-jdk-8' : config.mavenImage
   def docker = (config.dockerImage == null) ? 'ibmcom/docker:17.10' : config.dockerImage
   def kubectl = (config.kubectlImage == null) ? 'ibmcom/k8s-kubectl:v1.8.3' : config.kubectlImage
-  // def helm = (config.helmImage == null) ? 'lachlanevenson/k8s-helm:v2.7.2' : config.helmImage
-  def helm = (config.helmImage == null) ? 'kalantar/rhelm:latest' : config.helmImage
+  def helm = (config.helmImage == null) ? 'lachlanevenson/k8s-helm:v2.7.2' : config.helmImage
+  def rhelm = (config.rhelmImage == null) ? 'kalantar/rhelm:v2.7.2' : config.rhelmImage
   def mvnCommands = (config.mvnCommands == null) ? 'clean package' : config.mvnCommands
   def registry = (env.REGISTRY ?: "").trim()
   if (registry && !registry.endsWith('/')) registry = "${registry}/"
@@ -316,8 +316,8 @@ def initalizeHelm (String tillerNamespace) {
 
 def deployProject (String chartFolder, String registry, String image, String imageTag, String namespace, String manifestFolder, String registrySecret,deployVersions) {
   if (chartFolder != null && fileExists(chartFolder)) {
-    container ('helm') {
-      def deployCommand = "helm upgrade --install --wait --values pipeline.yaml"
+    container ('rhelm') {
+      def deployCommand = "rhelm upgrade --install --wait --values pipeline.yaml"
       if (fileExists("chart/overrides.yaml")) {
         deployCommand += " --values chart/overrides.yaml"
       }
@@ -327,7 +327,7 @@ def deployProject (String chartFolder, String registry, String image, String ima
       }
       def releaseName = (env.BRANCH_NAME == "master") ? "${image}" : "${image}-${env.BRANCH_NAME}"
       if (deployVersions) {
-        deployCommand = "r" + deployCommand + " --new-version ${releaseName}-${imageTag}"
+        deployCommand += " --new-version ${releaseName}-${imageTag}"
       }
       deployCommand += " ${releaseName} ${chartFolder}"
       sh deployCommand
