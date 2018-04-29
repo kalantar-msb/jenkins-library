@@ -309,7 +309,7 @@ def getDeployBranch () {
 }
 
 def initalizeHelm (String tillerNamespace) {
-  container ('helm') {        
+  container ('rhelm') {        
     sh "helm init --skip-refresh"    
   }
   echo "Waiting until Tiller is running"
