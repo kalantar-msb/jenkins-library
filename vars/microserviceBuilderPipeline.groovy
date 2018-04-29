@@ -320,6 +320,8 @@ def initalizeHelm (String tillerNamespace) {
 
 def deployProject (String chartFolder, String registry, String image, String imageTag, String namespace, String manifestFolder, String registrySecret,deployVersions) {
   if (chartFolder != null && fileExists(chartFolder)) {
+    sh "docker images"
+    sh "docker ps"
     container ('rhelm') {
       def deployCommand = "rhelm upgrade --install --wait --values pipeline.yaml"
       if (fileExists("chart/overrides.yaml")) {
