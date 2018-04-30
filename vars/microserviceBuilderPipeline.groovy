@@ -323,9 +323,6 @@ def deployProject (String chartFolder, String registry, String image, String ima
     sh "echo deployVersions = ${deployVersions}"
     sh "echo imageTag = ${imageTag}"
     container ('rhelm') {
-      sh "echo {chartFolder}"
-      sh "cat ${chartFolder}/templates/deployment.yaml"
-      sh "helm install --dry-run --debug -f chart/overrides.yaml --tiller-namespace default --name FOO ${chartFolder}"
       def deployCommand = "rhelm upgrade --install --wait --values pipeline.yaml"
       if (fileExists("chart/overrides.yaml")) {
         deployCommand += " --values chart/overrides.yaml"
@@ -336,7 +333,7 @@ def deployProject (String chartFolder, String registry, String image, String ima
       }
       def releaseName = (env.BRANCH_NAME == "master") ? "${image}" : "${image}-${env.BRANCH_NAME}"
       if (deployVersions) {
-        deployCommand += " --new-version ${releaseName}-${imageTag}"
+        deployCommand += " --new-version ${releaseName}-${env.BUILD_NUMBER}"
       }
       deployCommand += " ${releaseName} ${chartFolder}"
       sh deployCommand
