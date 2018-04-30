@@ -333,6 +333,7 @@ def deployProject (String chartFolder, String registry, String image, String ima
       }
       def releaseName = (env.BRANCH_NAME == "master") ? "${image}" : "${image}-${env.BRANCH_NAME}"
       if (deployVersions) {
+        deployCommand += " --set release.version=${env.BUILD_NUMBER}"
         deployCommand += " --new-version ${releaseName}-${env.BUILD_NUMBER}"
       }
       deployCommand += " ${releaseName} ${chartFolder}"
