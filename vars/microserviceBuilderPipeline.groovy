@@ -323,6 +323,7 @@ def deployProject (String chartFolder, String registry, String image, String ima
     sh "echo deployVersions = ${deployVersions}"
     sh "echo imageTag = ${imageTag}"
     container ('rhelm') {
+      sh "helm upgrade --dry-run --debug --install -f chart/overrides.yaml --tiller-namespace default foo ${chartFolder}"
       def deployCommand = "rhelm upgrade --install --wait --values pipeline.yaml"
       if (fileExists("chart/overrides.yaml")) {
         deployCommand += " --values chart/overrides.yaml"
