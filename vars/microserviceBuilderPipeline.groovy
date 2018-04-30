@@ -62,9 +62,7 @@ def call(body) {
   def deploy = (config.deploy ?: env.DEPLOY ?: "true").toBoolean()
   def namespace = (config.namespace ?: env.NAMESPACE ?: "").trim()
   def tillerNamespace = (env.TILLER_NAMESPACE ?: "default").trim()
-  // MK - version demonstration
   def deployVersions = (config.deployVersions ?: env.DEPLOY_VERSIONS ?: "false").toBoolean()
-  def binPath = new File(getClass().protectionDomain.codeSource.location.path).parent + "/../bin"
 
   // these options were all added later. Helm chart may not have the associated properties set.
   def test = (config.test ?: (env.TEST ?: "false").trim()).toLowerCase() == 'true'
@@ -320,8 +318,6 @@ def initalizeHelm (String tillerNamespace) {
 
 def deployProject (String chartFolder, String registry, String image, String imageTag, String namespace, String manifestFolder, String registrySecret,deployVersions) {
   if (chartFolder != null && fileExists(chartFolder)) {
-    sh "echo deployVersions = ${deployVersions}"
-    sh "echo imageTag = ${imageTag}"
     container ('rhelm') {
       def deployCommand = "rhelm upgrade --install --wait --values pipeline.yaml"
       if (fileExists("chart/overrides.yaml")) {
