@@ -333,7 +333,7 @@ def deployProject (String chartFolder, String registry, String image, String ima
       if (deployVersions) {
         deployCommand += " --set versions.version=${env.BUILD_NUMBER}"
 	deployCommand += " --set versions.commit=${imageTag}"
-        deployCommand += " --set image.message=\'${commitMessage}\'"
+        // deployCommand += " --set image.message=\'${commitMessage}\'"
         deployCommand += " --new-version ${env.BUILD_NUMBER}"
       }
       deployCommand += " ${releaseName} ${chartFolder}"
