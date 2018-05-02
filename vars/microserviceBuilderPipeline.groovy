@@ -116,10 +116,12 @@ def call(body) {
   ) {
     node('msbPod') {
       def gitCommit
+      def gitCommitMessage
 
       stage ('Extract') {
         checkout scm
         gitCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+        gitCommitMessage = sh(script: "git log --format=%B -n 1 ${gitCommit}", returnsStdout: true).trim()
         echo "checked out git commit ${gitCommit}"
       }
 
@@ -287,7 +289,7 @@ def call(body) {
             initalizeHelm (tillerNamespace)
             helmInitialized = true
           }
-          deployProject (realChartFolder, registry, image, imageTag, namespace, manifestFolder, registrySecret, deployVersions)
+          deployProject (realChartFolder, registry, image, imageTag, namespace, manifestFolder, registrySecret, deployVersions, gitCommitMessage)
         }
       }
     }
@@ -316,7 +318,7 @@ def initalizeHelm (String tillerNamespace) {
   }
 }
 
-def deployProject (String chartFolder, String registry, String image, String imageTag, String namespace, String manifestFolder, String registrySecret,deployVersions) {
+def deployProject (String chartFolder, String registry, String image, String imageTag, String namespace, String manifestFolder, String registrySecret,deployVersions, commitMessage) {
   if (chartFolder != null && fileExists(chartFolder)) {
     container ('rhelm') {
       def deployCommand = "rhelm upgrade --install --wait --values pipeline.yaml"
@@ -330,7 +332,11 @@ def deployProject (String chartFolder, String registry, String image, String ima
       def releaseName = (env.BRANCH_NAME == "master") ? "${image}" : "${image}-${env.BRANCH_NAME}"
       if (deployVersions) {
         deployCommand += " --set versions.version=${env.BUILD_NUMBER}"
-        deployCommand += " --new-version ${releaseName}-${env.BUILD_NUMBER}"
+	deployCommnad += " --set versions.commit=${imageTag}"
+        deployCommnad += " --set versions.commit_message=${commitMessage}"
+        deployCommand += " --new-version ${env.BUILD_NUMBER}"
+        sh "echo imageTag=${imageTag}"
+        sh "echo commitMessage=${commitMessage}"
       }
       deployCommand += " ${releaseName} ${chartFolder}"
       sh deployCommand
