@@ -121,7 +121,7 @@ def call(body) {
       stage ('Extract') {
         checkout scm
         gitCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-        gitCommitMessage = sh(script: "git log --format=%B -n 1 ${gitCommit}", returnsStdout: true).trim()
+        gitCommitMessage = sh(script: "git log --format=%B -n 1 ${gitCommit}", returnStdout: true).trim()
         echo "checked out git commit ${gitCommit}"
       }
 
