@@ -331,12 +331,12 @@ def deployProject (String chartFolder, String registry, String image, String ima
       }
       def releaseName = (env.BRANCH_NAME == "master") ? "${image}" : "${image}-${env.BRANCH_NAME}"
       if (deployVersions) {
-        deployCommand += " --set versions.version=${env.BUILD_NUMBER}"
-	deployCommnad += " --set versions.commit=${imageTag}"
-        deployCommnad += " --set versions.commit_message=${commitMessage}"
-        deployCommand += " --new-version ${env.BUILD_NUMBER}"
         sh "echo imageTag=${imageTag}"
         sh "echo commitMessage=${commitMessage}"
+        deployCommandSTOP += " --set versions.version=${env.BUILD_NUMBER}"
+	deployCommand += " --set versions.commit=${imageTag}"
+        deployCommand += " --set versions.commit_message=${commitMessage}"
+        deployCommand += " --new-version ${env.BUILD_NUMBER}"
       }
       deployCommand += " ${releaseName} ${chartFolder}"
       sh deployCommand
