@@ -208,7 +208,7 @@ def call(body) {
               }
               sh buildCommand
               if (registry) {
-                sh "docker tag ${image}:${imageTag} ${registry}${image}:${imageTag}"
+                timeout(time: 5, unit: 'SECONDS') { sh "docker tag ${image}:${imageTag} ${registry}${image}:${imageTag}" }
                 sh "docker push ${registry}${image}:${imageTag}"
               }
             }
@@ -236,12 +236,14 @@ def call(body) {
           String tempHelmRelease = (image + "-" + testNamespace)
           // Name cannot end in '-' or be longer than 53 chars
           while (tempHelmRelease.endsWith('-') || tempHelmRelease.length() > 53) tempHelmRelease = tempHelmRelease.substring(0,tempHelmRelease.length()-1)
+          timeout(time: 30, unit: 'SECONDS') {
           container ('kubectl') {
             sh "kubectl create namespace ${testNamespace}"
             sh "kubectl label namespace ${testNamespace} test=true"
             if (registrySecret) {
               giveRegistryAccessToNamespace (testNamespace, registrySecret)
             }
+          }
           }
 
           if (!helmInitialized) {
@@ -298,12 +300,14 @@ def call(body) {
 
 def getDeployBranch () {
   def deployBranch
+  timeout(time: 30, unit: 'SECONDS') {
   container ('kubectl') {
     def array = env.JOB_NAME.split("/")
     def projectNamespace = array[0]
     def projectName = array[1]
     deployBranch = sh returnStdout: true, script: "kubectl get project ${projectName} --namespace=${projectNamespace} -o go-template='{{.spec.deployBranch}}'"
     print "Deploy branch for project ${projectName} in namespace ${projectNamespace} is ${deployBranch}"
+  }
   }
   return deployBranch
 }
@@ -340,6 +344,7 @@ def deployProject (String chartFolder, String registry, String image, String ima
       sh deployCommand
     }
   } else if (fileExists(manifestFolder)) {
+    timeout(time: 60, unit: 'SECONDS') {
     container ('kubectl') {
       def deployCommand = "kubectl apply -f ${manifestFolder}"
       if (namespace) {
@@ -348,6 +353,7 @@ def deployProject (String chartFolder, String registry, String image, String ima
       }
       sh deployCommand
     }
+    }
   }
 }
 
@@ -355,6 +361,7 @@ def deployProject (String chartFolder, String registry, String image, String ima
   Create target namespace and give access to regsitry
 */
 def createNamespace(String namespace, String registrySecret) {
+  timeout(time: 30, unit: 'SECONDS') {
   container ('kubectl') {
     ns_exists = sh(returnStatus: true, script: "kubectl get namespace ${namespace}")
     if (ns_exists != 0) {
@@ -363,6 +370,7 @@ def createNamespace(String namespace, String registrySecret) {
         giveRegistryAccessToNamespace (namespace, registrySecret)
       }
     }
+  }
   }
 }
 
